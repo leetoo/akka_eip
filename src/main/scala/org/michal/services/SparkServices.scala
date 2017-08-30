@@ -1,4 +1,4 @@
-package org.michal.routes
+package org.michal.services
 
 import java.util.UUID
 
@@ -12,7 +12,7 @@ import org.michal.domain.User
 import org.michal.factory.DatabaseAccess
 
 
-trait SparkService extends DatabaseAccess {
+trait RestService extends DatabaseAccess[User] {
 
   implicit val system:ActorSystem
   implicit val materializer:ActorMaterializer

@@ -1,3 +1,3 @@
 package org.michal.domain
 
-case class User(id: String, name: String, email: String)
+case class User(ccid: String, name: String, email: String) extends Identifiable

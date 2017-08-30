@@ -6,10 +6,14 @@ import java.util.UUID
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.michal.domain.User
-import org.michal.routes.SparkService
+import org.michal.services.RestService
 import org.scalatest.{Matchers, WordSpec}
 
-class SparkServicesSpec extends WordSpec with Matchers with ScalatestRouteTest with SparkService {
+class RestServicesSpec extends WordSpec with Matchers with ScalatestRouteTest with RestService {
+
+  override val sc = _
+  override val keyspace = _
+  override val tableName = _
 
   val documentId = "user::" + UUID.randomUUID().toString
   val jsonObject = User("1", "mici", "lolo@zuru.com")
@@ -26,4 +30,7 @@ class SparkServicesSpec extends WordSpec with Matchers with ScalatestRouteTest w
       Get("/retrieve/id/1") ~> sparkRoutes ~> check {
         responseAs[String].contains("lolo@zuru.com") shouldEqual true
       }
-    }}}
+    }}
+
+
+}
