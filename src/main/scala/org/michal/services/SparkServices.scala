@@ -12,7 +12,7 @@ import org.michal.domain.User
 import org.michal.factory.DatabaseAccess
 
 
-trait RestService extends DatabaseAccess[User] {
+trait RestService extends DatabaseAccess {
 
   implicit val system:ActorSystem
   implicit val materializer:ActorMaterializer
@@ -33,7 +33,7 @@ trait RestService extends DatabaseAccess[User] {
           val documentId = "user::" + UUID.randomUUID().toString
           try {
             val user = User(documentId,name,email)
-            val isPersisted = create(user)
+            val isPersisted = createUser(user)
             if (isPersisted) {
               HttpResponse(StatusCodes.Created, entity = s"Data is successfully persisted with id $documentId")
             } else {
@@ -50,7 +50,7 @@ trait RestService extends DatabaseAccess[User] {
       get {
         complete {
           try {
-            val idAsRDD: Option[Array[User]] = retrieve(listOfIds)
+            val idAsRDD: Option[Array[User]] = retrieveUser(listOfIds)
             idAsRDD match {
               case Some(data) => HttpResponse(StatusCodes.OK, entity = data.mkString(","))
               case None => HttpResponse(StatusCodes.InternalServerError, entity = s"Data is not fetched and something went wrong")

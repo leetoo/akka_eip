@@ -11,13 +11,13 @@ import org.scalatest.{Matchers, WordSpec}
 
 class RestServicesSpec extends WordSpec with Matchers with ScalatestRouteTest with RestService {
 
-  override val sc = _
-  override val keyspace = _
-  override val tableName = _
+  override val sc = ???
+  override val keyspace = ""
+  override val tableName = ""
 
   val documentId = "user::" + UUID.randomUUID().toString
   val jsonObject = User("1", "mici", "lolo@zuru.com")
-  create(jsonObject)
+  createUser(jsonObject)
   "The service" should {
 
     "be able to insert data in the couchbase" in {

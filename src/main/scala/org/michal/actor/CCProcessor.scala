@@ -3,8 +3,9 @@ package org.michal.actor
 import akka.actor.{ActorRef, FSM}
 import org.michal.actor.CCProcessor._
 import org.michal.domain.CCReq
+import org.michal.services.DataAccessService
 
-class CCProcessor extends FSM[CCProcessor.State, CCProcessor.Data]{
+class CCProcessor(dao: DataAccessService) extends FSM[CCProcessor.State, CCProcessor.Data]{
 
   startWith(Idle, Uninitialized)
 
