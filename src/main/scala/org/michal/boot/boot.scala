@@ -4,11 +4,12 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import org.apache.spark.SparkContext
+import org.michal.actor.CCProcessor
 import org.michal.services.{DataAccessService, RestService}
 import org.michal.factory.Context
 
 
-case class StartHttp(override val sc: SparkContext, override val keyspace: String, override val tableName: String)(implicit val system: ActorSystem,
+case class StartHttp(sc: SparkContext, override val dao: DataAccessService)(implicit val system: ActorSystem,
                                                                                                                    implicit val materializer: ActorMaterializer) extends RestService {
   def startServer(address: String, port: Int) = {
     Http().bindAndHandle(sparkRoutes, address, port)
@@ -28,10 +29,11 @@ object StartApp {
 
   val sc: SparkContext = Context.sc
 
-  val server = StartHttp(sc, Context.keyspace, Context.tableName)
+  val dao: DataAccessService = DataAccessService(sc, Context.keyspace, Context.tableName)
+  val server = StartHttp(sc, dao)
   val config = Context.config
   val serverUrl = config.getString("http.interface")
   val port = config.getInt("http.port")
   server.startServer(serverUrl, port)
-  val dao: DataAccessService = DataAccessService(sc, Context.keyspace, "cctable")
+  system.actorOf(CCProcessor.props(dao))
 }

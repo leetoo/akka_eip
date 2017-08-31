@@ -8,15 +8,25 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ExceptionHandler, Route}
 import akka.stream.ActorMaterializer
-import org.michal.domain.User
+import org.michal.actor.CCProcessor
+import org.michal.domain.{CCReq, User}
 import org.michal.factory.DatabaseAccess
+import akka.pattern.ask
+import akka.util.Timeout
+
+import concurrent.duration._
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 
-trait RestService extends DatabaseAccess {
+trait RestService {
 
+  val dao: DataAccessService
   implicit val system:ActorSystem
   implicit val materializer:ActorMaterializer
   val logger = Logging(system, getClass)
+
+  implicit val timeout = Timeout(5 seconds)
 
   implicit def myExceptionHandler =
     ExceptionHandler {
@@ -33,7 +43,7 @@ trait RestService extends DatabaseAccess {
           val documentId = "user::" + UUID.randomUUID().toString
           try {
             val user = User(documentId,name,email)
-            val isPersisted = createUser(user)
+            val isPersisted = dao.createUser(user)
             if (isPersisted) {
               HttpResponse(StatusCodes.Created, entity = s"Data is successfully persisted with id $documentId")
             } else {
@@ -50,7 +60,7 @@ trait RestService extends DatabaseAccess {
       get {
         complete {
           try {
-            val idAsRDD: Option[Array[User]] = retrieveUser(listOfIds)
+            val idAsRDD: Option[Array[User]] = dao.retrieveUser(listOfIds)
             idAsRDD match {
               case Some(data) => HttpResponse(StatusCodes.OK, entity = data.mkString(","))
               case None => HttpResponse(StatusCodes.InternalServerError, entity = s"Data is not fetched and something went wrong")
@@ -60,6 +70,15 @@ trait RestService extends DatabaseAccess {
               logger.error(ex, ex.getMessage)
               HttpResponse(StatusCodes.InternalServerError, entity = s"Error found for ids : $listOfIds")
           }
+        }
+      }
+    } ~ path("retrievecc" / "id" / Segment) { listOfIds =>
+      get {
+        val ccActor = system.actorOf(CCProcessor.props(dao))
+        val future: Future[Any] = ccActor ? CCReq("1", 1)
+        onComplete(future) {
+          case Success(s) => complete(StatusCodes.OK, s.toString)
+          case Failure(e) => complete(StatusCodes.InternalServerError, e)
         }
       }
     }
