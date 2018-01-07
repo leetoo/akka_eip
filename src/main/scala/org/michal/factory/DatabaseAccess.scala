@@ -19,9 +19,6 @@ trait DatabaseAccess {
   val keyspace: String
   val tableName: String
 
-
-
-
   def createCCItem(ccitem: CCItem): Boolean =
     Try(sc.parallelize(Seq(ccitem)).saveToCassandra(keyspace, tableName)).toOption.isDefined
 
@@ -42,7 +39,7 @@ trait DatabaseAccess {
 object Context {
   val config = ConfigFactory.load()
   val url = config.getString("cassandra.url")
-  val sparkConf: SparkConf = new SparkConf().setAppName("Saprk-cassandra-akka-rest-example").setMaster("local[4]")
+  val sparkConf: SparkConf = new SparkConf().setAppName("Spark-cassandra-akka-rest-example").setMaster("local[4]")
     .set("spark.cassandra.connection.host", url)
   val spark = SparkSession.builder().config(sparkConf).getOrCreate()
   val sc: SparkContext = spark.sparkContext
