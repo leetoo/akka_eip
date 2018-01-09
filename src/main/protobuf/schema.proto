@@ -1,0 +1,67 @@
+syntax = "proto3";
+package com.michal.domain.proto;
+
+import "scalapb/scalapb.proto";
+import "google/protobuf/wrappers.proto";
+
+// [END declaration]
+
+// [START java_declaration]
+//option java_package = "com.example.prototutorial";
+//option java_outer_classname = "AddressBookProtos";
+// [END java_declaration]
+
+// [START csharp_declaration]
+//option csharp_namespace = "Google.Protobuf.Examples.AddressBook";
+// [END csharp_declaration]
+
+// [START messages]
+message Person {
+    string name = 1;
+    int32 id = 2;  // Unique ID number for this person.
+    string email = 3;
+
+    enum PhoneType {
+        MOBILE = 0;
+        HOME = 1;
+        WORK = 2;
+    }
+
+    message PhoneNumber {
+        string number = 1;
+        PhoneType type = 2;
+    }
+
+    repeated PhoneNumber phones = 4;
+}
+
+// Our address book file is just one of these.
+message AddressBook {
+    repeated Person people = 1;
+}
+
+message MessageProto {
+    option (scalapb.message).extends = "org.michal.domain.PrBuf";
+    bytes payload = 1;
+    string id = 2;
+    string msgType = 3;
+}
+
+message GetUserRequestProto {
+    option (scalapb.message).extends = "org.michal.domain.PrBuf";
+    string msgType = 1;
+    string userId = 2;
+}
+
+message UserProto {
+    option (scalapb.message).extends = "org.michal.domain.PrBuf";
+    string id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message GetUserResponseProto {
+    option (scalapb.message).extends = "org.michal.domain.PrBuf";
+    string msgType = 1;
+    repeated UserProto users = 2;
+}
