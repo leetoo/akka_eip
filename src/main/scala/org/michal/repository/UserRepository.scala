@@ -5,7 +5,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import io.getquill.MappedEncoding
-import org.apache.cassandra.utils.UUIDGen
+//import org.apache.cassandra.utils.UUIDGen
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -15,7 +15,7 @@ class UserRepository(implicit actorSystem: ActorSystem) {
 
 //  lazy val ttl = config.cassandraConfig.getInt("ttl")
 
-  implicit val encodeLocalDateTime: MappedEncoding[LocalDateTime, UUID] =
-    MappedEncoding[LocalDateTime, UUID](x => UUIDGen.getTimeUUID(x.toInstant(ZoneOffset.UTC).toEpochMilli))
+//  implicit val encodeLocalDateTime: MappedEncoding[LocalDateTime, UUID] =
+//    MappedEncoding[LocalDateTime, UUID](x => UUIDGen.getTimeUUID(x.toInstant(ZoneOffset.UTC).toEpochMilli))
 
 }

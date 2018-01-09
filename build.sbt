@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-persistence_2.11" % "2.5.8",
   "com.typesafe.akka" % "akka-persistence-cassandra_2.11" % "0.80-RC3",
   "com.typesafe.akka" % "akka-persistence-cassandra-launcher_2.11" % "0.80-RC3" % "test",
-  "org.apache.cassandra" % "cassandra-all" % "3.9" exclude("ch.qos.logback", "logback-classic"),
+//  "org.apache.cassandra" % "cassandra-all" % "3.9" exclude("ch.qos.logback", "logback-classic"),
   "org.apache.spark" % "spark-core_2.11" % "2.2.1",
   "org.apache.spark" % "spark-sql_2.11" % "2.2.1",
   "com.typesafe.akka" %% "akka-http-core" % "10.0.11",

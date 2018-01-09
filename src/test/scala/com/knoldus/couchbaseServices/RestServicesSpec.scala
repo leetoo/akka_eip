@@ -5,7 +5,7 @@ package com.knoldus.couchbaseServices
 import java.util.UUID
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import org.michal.boot.StartApp.sc
+//import org.michal.boot.StartApp.sc
 import org.michal.domain.User
 import org.michal.factory.Context
 import org.michal.services.{ RestService}
