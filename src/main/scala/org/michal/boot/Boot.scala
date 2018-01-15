@@ -5,10 +5,9 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings, ShardReg
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import io.getquill.{CassandraAsyncContext, SnakeCase}
-import org.apache.spark.SparkContext
-import org.michal.UserEntityActor
+import org.michal.{Command, UserEntityActor}
 import org.michal.actor.claimcheck.CCProcessor
-import org.michal.domain.GetUserRequest
+import org.michal.domain.{CreateUserCommand, GetUserRequest}
 import org.michal.services.{RestService, SerUtil}
 import org.michal.factory.Context
 import org.michal.persistence.CCService
@@ -59,10 +58,16 @@ object StartApp {
 
   private def extractEntityId(size: Long): ShardRegion.ExtractEntityId = {
     case req: GetUserRequest => (req.userId, req)
+    case Command.matcher(cmd) => cmd.payload match {
+      case cuc: CreateUserCommand => (cuc.user.id, cmd)
+    }
   }
 
   private def extractShardId(size: Long): ShardRegion.ExtractShardId = {
     case req: GetUserRequest => (req.userId.hashCode % size).toString
+    case Command.matcher(cmd) => cmd.payload match {
+      case cuc: CreateUserCommand => (cuc.user.id.hashCode % size).toString
+    }
   }
 
 //  system.actorOf(CCProcessor.props(new CCService(new CassandraAsyncContext[SnakeCase](SnakeCase, ""), new SerUtil)))

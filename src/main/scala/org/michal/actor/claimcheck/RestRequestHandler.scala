@@ -3,7 +3,8 @@ package org.michal.actor.claimcheck
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
 import org.michal.UserEntityActor
-import org.michal.domain.GetUserRequest
+import org.michal.domain.{CreateUserCommand, GetUserRequest}
+
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -16,6 +17,7 @@ class RestRequestHandler(cl: ActorRef) extends Actor {
 
   override def receive: Receive = {
     case r: GetUserRequest => (cl ? r) pipeTo sender
+    case CreateUserCommand.matcher(createUser) => (cl ? createUser) pipeTo sender
   }
 }
 

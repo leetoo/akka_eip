@@ -53,6 +53,18 @@ message GetUserRequestProto {
     string userId = 2;
 }
 
+message CreateUserCommandProto {
+    option (scalapb.message).extends = "org.michal.domain.PrBuf";
+    string msgType = 1;
+    UserProto user = 2;
+}
+
+message CreateUserEventProto {
+    option (scalapb.message).extends = "org.michal.domain.PrBuf";
+    string msgType = 1;
+    UserProto user = 2;
+}
+
 message UserProto {
     option (scalapb.message).extends = "org.michal.domain.PrBuf";
     string id = 1;
@@ -64,4 +76,10 @@ message GetUserResponseProto {
     option (scalapb.message).extends = "org.michal.domain.PrBuf";
     string msgType = 1;
     repeated UserProto users = 2;
+}
+
+message StringNotificationProto {
+    option (scalapb.message).extends = "org.michal.domain.PrBuf";
+    string msgType = 1;
+    string notification = 2;
 }

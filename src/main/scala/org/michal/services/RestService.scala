@@ -8,9 +8,10 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ExceptionHandler, Route}
 import akka.stream.ActorMaterializer
-import org.michal.domain.{GetUserRequest, User}
+import org.michal.domain.{CreateUserCommand, GetUserRequest, User}
 import akka.pattern.ask
 import akka.util.Timeout
+import org.michal.Msg
 import org.michal.actor.claimcheck.{CCProcessor, RestRequestHandler}
 
 import concurrent.duration._
@@ -37,7 +38,7 @@ trait RestService {
     }
 
   val sparkRoutes: Route = {
-    get {
+//    get {
       //      path("create" / "name" / Segment / "email" / Segment) { (name: String, email: String) =>
       //        complete {
       //          val documentId = "user::" + UUID.randomUUID().toString
@@ -73,6 +74,15 @@ trait RestService {
       //        }
       //      }
       //    } ~
+      path("createuser" / "id" / Segment) { id =>
+        get {
+          val future: Future[Any] = system.actorOf(RestRequestHandler.props(cluster)) ? Msg(CreateUserCommand(User(id, "lolo", "asid@wp")))
+          onComplete(future) {
+            case Success(s) => complete(StatusCodes.OK, s.toString)
+            case Failure(e) => complete(StatusCodes.InternalServerError, e)
+          }
+        }
+      } ~
       path("retrievecc" / "id" / Segment) { listOfIds =>
         get {
           val future: Future[Any] = system.actorOf(RestRequestHandler.props(cluster)) ? GetUserRequest("1")
@@ -81,8 +91,13 @@ trait RestService {
             case Failure(e) => complete(StatusCodes.InternalServerError, e)
           }
         }
-      }
-    }
+      } ~
+        path("hello") {
+          get {
+            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
+          }
+        }
+//    }
   }
 
 }

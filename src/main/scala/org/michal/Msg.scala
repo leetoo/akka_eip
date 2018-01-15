@@ -1,7 +1,8 @@
 package org.michal
 
 import com.michal.domain.proto.schema.MessageProto
-import org.michal.domain.{GetUserRequest, GetUserResponse, PrBuf}
+import org.michal.domain._
+import shapeless.TypeCase
 
 
 case class Msg[P <: Payl](payload: P, id: String = "") {
@@ -44,8 +45,13 @@ abstract class Command(override val msgType: String) extends Payl(msgType) {
 abstract class Request(override val msgType: String) extends Payl(msgType) {
   def toProto: PrBuf
 }
+abstract class Notification(override val msgType: String) extends Payl(msgType) {
+  def toProto: PrBuf
+}
 
 object Request {
+
+  val matcher: TypeCase[Msg[Request]] = TypeCase[Msg[Request]]
 
   def protoInf[P <: Payl]: PartialFunction[P, PrBuf] = {
     case payload: GetUserRequest => payload.toProto
@@ -58,6 +64,8 @@ object Request {
 
 object Response {
 
+  val matcher: TypeCase[Msg[Request]] = TypeCase[Msg[Request]]
+
   def protoInf[P <: Payl]: PartialFunction[P, PrBuf] = {
     case payload: GetUserResponse => payload.toProto
   }
@@ -65,4 +73,35 @@ object Response {
   def payloadInf: PartialFunction[MessageProto, _ <: Response] = {
     case m: MessageProto if m.msgType == GetUserResponse.msgType => GetUserResponse(m.payload.toByteArray)
   }
+}
+
+object Event {
+
+  val matcher: TypeCase[Msg[Event]] = TypeCase[Msg[Event]]
+
+  def protoInf[P <: Payl]: PartialFunction[P, PrBuf] = {
+    case payload: CreateUserEvent => payload.toProto
+  }
+
+  def payloadInf: PartialFunction[MessageProto, _ <: Event] = {
+    case m: MessageProto if m.msgType == CreateUserEvent.msgType => CreateUserEvent(m.payload.toByteArray)
+  }
+}
+
+object Command {
+
+  val matcher: TypeCase[Msg[Command]] = TypeCase[Msg[Command]]
+
+  def protoInf[P <: Payl]: PartialFunction[P, PrBuf] = {
+    case payload: CreateUserCommand => payload.toProto
+  }
+
+  def payloadInf: PartialFunction[MessageProto, _ <: Command] = {
+    case m: MessageProto if m.msgType == CreateUserCommand.msgType => CreateUserCommand(m.payload.toByteArray)
+  }
+
+}
+
+object Notification {
+  val matcher: TypeCase[Msg[Notification]] = TypeCase[Msg[Notification]]
 }
