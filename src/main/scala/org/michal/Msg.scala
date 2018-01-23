@@ -5,10 +5,11 @@ import org.michal.domain._
 import shapeless.TypeCase
 
 
-case class Msg[P <: Payl](payload: P, id: String = "") {
+case class Msg[P <: Payl](payload: P, id: String) {
   def toProto(adapter: P => PrBuf): MessageProto = MessageProto(
     id = id,
-    msgType = payload.msgType
+    msgType = payload.msgType,
+    payload = adapter(payload).toByteString
   )
 }
 

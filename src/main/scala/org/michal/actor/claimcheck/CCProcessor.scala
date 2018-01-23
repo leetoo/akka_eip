@@ -46,7 +46,7 @@ class CCProcessor(dao: CCRepository) extends FSM[CCProcessor.State, CCProcessor.
       r.messages.foreach(msgs => msgs.groupBy(_.payload.msgType).foreach(tu => {
         val ccid = dao.create(tu._2)
         val response = CCResponse(ccid, tu._1, tu._2.size, r.origId, r.entityId, r.originator.get)
-        originator ! Msg(response)
+        originator ! Msg(response, r.origId)
         log.info(s"Checked: ${r.origId}, ccid: $ccid, msgType: ${tu._1}, entityId: ${r.entityId}, no of messages-per-payload-type: ${tu._2.size}")
       }))
 

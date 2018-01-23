@@ -56,7 +56,7 @@ class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck 
   def handleCommand(u: Option[User], c: Msg[Command]): Msg[_] = c.payload match {
     case cr: CreateUserCommand => state match {
       case None => Msg(CreateUserEvent(cr.user), c)
-      case Some(_) => Msg(StringNotification("User already exists..."))
+      case Some(_) => Msg(StringNotification("User already exists..."), c)
     }
   }
 

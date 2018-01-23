@@ -7,6 +7,9 @@ import org.michal.Response.{payloadInf => respPaylInf, protoInf => respProtoInf}
 import org.michal.Request.{payloadInf => reqPaylInf, protoInf => reqProtoInf}
 import org.michal.Event.{payloadInf => evPaylInf, protoInf => evProtoInf}
 
+/**
+  * Serializes/Deserializes protobuf Msg[_]
+  */
 class SerUtil extends SerializerWithStringManifest {
   override def identifier = 345678
 
@@ -28,22 +31,19 @@ class SerUtil extends SerializerWithStringManifest {
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {
     case Response.matcher(response) =>
-      response.payload match {
-        case pld: GetUserResponse => pld.toProto.toByteArray
-      }
+      response.toProto(respProtoInf).toByteArray
     case Request.matcher(request) =>
-      request.payload match {
-        case pld: GetUserRequest => pld.toProto.toByteArray
-      }
+      request.toProto(reqProtoInf).toByteArray
     case Event.matcher(event) =>
-      event.payload match {
-        case pld: CreateUserEvent => pld.toProto.toByteArray
-      }
+      event.toProto(evProtoInf).toByteArray
   }
 
   override def fromBinary(bytes: Array[Byte], manifest: String): Msg[_ >: Event with Request with Response <: Payl] = manifest match {
-    case CreateUserEvent.msgType => Msg(bytes, evPaylInf)
-    case GetUserRequest.msgType => Msg(bytes, reqPaylInf)
-    case GetUserResponse.msgType => Msg(bytes, respPaylInf)
+    case CreateUserEvent.msgType =>
+      Msg(bytes, evPaylInf)
+    case GetUserRequest.msgType =>
+      Msg(bytes, reqPaylInf)
+    case GetUserResponse.msgType =>
+      Msg(bytes, respPaylInf)
   }
 }
