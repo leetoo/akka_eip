@@ -27,7 +27,7 @@ trait RestService {
   implicit val materializer: ActorMaterializer
   val logger = Logging(system, getClass)
 
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
   implicit def myExceptionHandler =
     ExceptionHandler {
@@ -74,18 +74,24 @@ trait RestService {
       //        }
       //      }
       //    } ~
-      path("createuser" / "id" / Segment) { id =>
+      path("createuser" / "name" / Segment / "email" / Segment) { (name, email) =>
         get {
-          val future: Future[Any] = system.actorOf(RestRequestHandler.props(cluster)) ? Msg(CreateUserCommand(User(id, "lolo", "asid@wp")))
+          val msgId = UUID.randomUUID().toString
+          val usrId = UUID.randomUUID().toString
+          logger.info(s"Create user: msgId: $msgId, userId: $usrId")
+          val future: Future[Any] = system.actorOf(RestRequestHandler.props(cluster)) ?
+            Msg(CreateUserCommand(User(usrId, name, email)), msgId)
           onComplete(future) {
             case Success(s) => complete(StatusCodes.OK, s.toString)
             case Failure(e) => complete(StatusCodes.InternalServerError, e)
           }
         }
       } ~
-      path("retrievecc" / "id" / Segment) { listOfIds =>
+      path("getuser" / "id" / Segment) { id =>
         get {
-          val future: Future[Any] = system.actorOf(RestRequestHandler.props(cluster)) ? GetUserRequest("1")
+          val msgId = UUID.randomUUID().toString
+          logger.info(s"Get user: msgId: $msgId, userId: $id")
+          val future = system.actorOf(RestRequestHandler.props(cluster)) ? Msg(GetUserRequest(id), msgId)
           onComplete(future) {
             case Success(s) => complete(StatusCodes.OK, s.toString)
             case Failure(e) => complete(StatusCodes.InternalServerError, e)

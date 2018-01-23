@@ -25,10 +25,11 @@ libraryDependencies ++= Seq(
 //  "com.datastax.spark" % "spark-cassandra-connector_2.11" % "2.0.6",
   "io.getquill" % "quill-cassandra_2.11" % "2.3.2",
   "com.github.romix.akka"      %% "akka-kryo-serialization"             % "0.5.0",
-  "org.cassandraunit" % "cassandra-unit"  % "3.3.0.2" % "test",
+  "org.cassandraunit" % "cassandra-unit"  % "3.3.0.2" % "test"
 )
 libraryDependencies += "com.trueaccord.scalapb" %% "scalapb-runtime" % com.trueaccord.scalapb.compiler.Version.scalapbVersion % "protobuf"
 
+PB.pythonExe := "c:\\Users\\michal\\Anaconda3\\envs\\python27\\python.exe"
 PB.targets in Compile := Seq(
   scalapb.gen() -> (sourceManaged in Compile).value
 )

@@ -64,7 +64,7 @@ object Request {
 
 object Response {
 
-  val matcher: TypeCase[Msg[Request]] = TypeCase[Msg[Request]]
+  val matcher: TypeCase[Msg[Response]] = TypeCase[Msg[Response]]
 
   def protoInf[P <: Payl]: PartialFunction[P, PrBuf] = {
     case payload: GetUserResponse => payload.toProto

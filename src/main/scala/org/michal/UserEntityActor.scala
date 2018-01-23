@@ -10,6 +10,7 @@ import org.michal.services.SerUtil
 
 import scala.io.Codec
 
+case object Shutdown
 
 class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck {
 
@@ -25,12 +26,13 @@ class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck 
           log.info(s"Handling event ${ev.id}")
           persist(ev) { persEv =>
             handleEvent(persEv)
-            sender ! "success"
+            sender ! persEv
           }
         case Notification.matcher(n) =>
           log.info(n.toString)
           sender ! n.toString
       }
+      //TODO: no matcher
     case GetUserRequest.matcher(r) =>
       CCActor ! CCReq(
         ccid = None,
@@ -42,6 +44,8 @@ class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck 
       )
     case CCResponse.matcher(r) =>
       r.payload.originator ! r
+    case Shutdown =>
+      context.stop(self)
   }
 
 
