@@ -3,7 +3,7 @@ package org.michal
 import java.net.URLDecoder
 
 import akka.actor.{ActorLogging, Props}
-import akka.persistence.PersistentActor
+import akka.persistence.{PersistentActor, SaveSnapshotFailure, SaveSnapshotSuccess, SnapshotOffer}
 import org.michal.actor.claimcheck.{CCReq, ClaimCheck}
 import org.michal.domain._
 import org.michal.services.SerUtil
@@ -16,6 +16,11 @@ class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck 
 
   var state: Option[User] = None
 
+  var eventsSinceLastSnapshot: Int = 0
+
+  //TODO: move to configuration
+  def snapshotAfterCount = Option(3)
+
   override val ccSerializer = new SerUtil
 
   override def receiveCommand: Receive = {
@@ -26,6 +31,10 @@ class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck 
           log.info(s"Handling event ${ev.id}")
           persist(ev) { persEv =>
             handleEvent(persEv)
+            if (snapshotAfterCount.isDefined) {
+              eventsSinceLastSnapshot += 1
+              maybeSnapshot()
+            }
             sender ! persEv
           }
         case Notification.matcher(n) =>
@@ -44,6 +53,10 @@ class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck 
       )
     case CCResponse.matcher(r) =>
       r.payload.originator ! r
+    case SaveSnapshotSuccess(metadata) =>
+      log.info(s"Snapshot saving success for persistenceId: ${metadata.persistenceId}, ${metadata.sequenceNr}")
+    case SaveSnapshotFailure(metadata, cause) =>
+      log.error(cause, s"Save snapshot failure for persistenceId: ${metadata.persistenceId}")
     case Shutdown =>
       context.stop(self)
   }
@@ -67,8 +80,19 @@ class UserEntityActor extends PersistentActor with ActorLogging with ClaimCheck 
     }
   }
 
+  def maybeSnapshot(): Unit = {
+    snapshotAfterCount.filter(eventsSinceLastSnapshot >= _).foreach{ i =>
+      saveSnapshot(state)
+      eventsSinceLastSnapshot = 0
+    }
+  }
+
   def userRecover: Receive = {
+    case SnapshotOffer(metadata, offeredSnapshot: Option[User]) =>
+      log.info(s"Snapshot offered for persistenceId: ${metadata.persistenceId}, seqNr: ${metadata.sequenceNr}")
+      state = offeredSnapshot
     case Event.matcher(e) =>
+      eventsSinceLastSnapshot += 1
       log.info(s"Recover applying message: $e")
       handleEvent(e)
   }

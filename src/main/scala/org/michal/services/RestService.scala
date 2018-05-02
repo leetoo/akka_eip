@@ -25,7 +25,7 @@ trait RestService {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
-  val logger = Logging(system, getClass)
+  val logger = Logging.getLogger(system, this)
 
   implicit val timeout = Timeout(10 seconds)
 
