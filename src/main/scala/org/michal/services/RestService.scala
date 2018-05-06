@@ -13,13 +13,14 @@ import akka.pattern.ask
 import akka.util.Timeout
 import org.michal.Msg
 import org.michal.actor.claimcheck.{CCProcessor, RestRequestHandler}
+import org.michal.domain.json.JsonSupport
 
 import concurrent.duration._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 
-trait RestService {
+trait RestService extends JsonSupport {
 
   val cluster: ActorRef
 
@@ -98,11 +99,28 @@ trait RestService {
           }
         }
       } ~
-        path("hello") {
-          get {
-            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
-          }
+      path("hello") {
+        get {
+          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
         }
+      } ~
+      pathPrefix("createuser_v2") {
+        concat(
+          post {
+            entity(as[User]) { user =>
+              val msgId = UUID.randomUUID().toString
+              val usrId = UUID.randomUUID().toString
+              logger.info(s"Create user: msgId: $msgId, userId: $usrId")
+              val future: Future[Any] = system.actorOf(RestRequestHandler.props(cluster)) ?
+                Msg(CreateUserCommand(user), msgId)
+              onComplete(future) {
+                case Success(s) => complete(StatusCodes.OK, s.toString)
+                case Failure(e) => complete(StatusCodes.InternalServerError, e)
+              }
+            }
+          }
+        )
+      }
 //    }
   }
 
