@@ -44,8 +44,4 @@ libraryDependencies += "com.typesafe.akka" %% "akka-distributed-data" % akkaVers
 PB.pythonExe := "c:\\Users\\michal\\Anaconda3\\envs\\python27\\python.exe"
 PB.targets in Compile := Seq(
   scalapb.gen() -> (sourceManaged in Compile).value
-) in Compile := Seq(
-  scalapb.gen() -> (sourceManaged in Compile).value
-) Compile := Seq(
-  scalapb.gen() -> (sourceManaged in Compile).value
 )
